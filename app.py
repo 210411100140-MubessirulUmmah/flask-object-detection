@@ -46,14 +46,18 @@ google = oauth.register(
     jwks_uri = "https://www.googleapis.com/oauth2/v3/certs",
 )
 
-# MySQL Database Connection
+import mysql.connector
+
+# MySQL Database Connection (Tanpa .env)
 def get_db_connection():
     return mysql.connector.connect(
-        host="localhost",
+        host="switchback.proxy.rlwy.net",
         user="root",
-        password="",
-        database="lung_ct_scan"
+        password="DcdhDHTeUjSYtJnLlYWQpShyNhRmyjEs",
+        database="railway",
+        port=10151
     )
+
 
 # Helper Function: Save Annotated Image
 def save_annotated_image(image, filename):
