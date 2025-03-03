@@ -49,13 +49,13 @@ google = oauth.register(
 import mysql.connector
 
 # MySQL Database Connection (Tanpa .env)
+# MySQL Database Connection
 def get_db_connection():
     return mysql.connector.connect(
-        host="switchback.proxy.rlwy.net",
+        host="localhost",
         user="root",
-        password="DcdhDHTeUjSYtJnLlYWQpShyNhRmyjEs",
-        database="railway",
-        port=10151
+        password="",
+        database="lung_ct_scan"
     )
 
 
