@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>CT Scan Detection</title>
+</head>
+<body>
+    <nav>
+        <div class="left">
+            <a href="/">Home</a>
+        </div>
+        <div class="right">
+            {% if session.get('user_id') or session.get('google_user') %}
+            <a href="/workspaces">Workspaces</a>
+            <a href="/logout">Logout</a>
+            {% else %}
+            <a href="/login">Login</a>
+            <a href="/register">Register</a>
+            {% endif %}
+        </div>
+    </nav>
+    
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

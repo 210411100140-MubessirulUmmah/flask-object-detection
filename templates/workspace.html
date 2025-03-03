@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Workspace {{ workspace_name }}</h1>
+
+
+<h2>Capture Image from Camera</h2>
+<button id="toggleCameraBtn" class="create-btn">Turn On Camera</button>
+<video id="video" class="camera-video" width="640" height="480" autoplay></video>
+<canvas id="canvas" style="display: none;"></canvas>
+<button id="captureBtn" class="create-btn" style="display: none; margin: 10px auto;background-color: #2c3e50;color: white;">Capture Image</button>
+
+<!-- Area untuk menampilkan hasil capture -->
+<img id="capturedImage" src="" alt="Captured Image" class="captured-image" style="display: none; margin: 0 auto; border: 2px solid blue; border-radius: 10px;">
+
+
+<!-- Form untuk mengunggah gambar -->
+<form id="uploadCapturedForm" method="POST" enctype="multipart/form-data" action="/workspace/{{ workspace_id }}/capture_upload">
+    <input type="file" id="capturedImageInput" name="image" style="display: none;">
+    <button type="submit" id="uploadCapturedImage" class="create-btn" style="display: none; margin-top: 10px;">Upload Captured Image</button>
+</form>
+
+<script>
+    let cameraOn = false;
+    let video = document.getElementById('video');
+    let captureBtn = document.getElementById('captureBtn');
+    let canvas = document.getElementById('canvas');
+    let context = canvas.getContext('2d');
+    let capturedImageInput = document.getElementById('capturedImageInput');
+    let uploadCapturedImage = document.getElementById('uploadCapturedImage');
+    let capturedImage = document.getElementById('capturedImage');
+
+    // Toggle camera on/off
+    document.getElementById('toggleCameraBtn').onclick = function() {
+        if (cameraOn) {
+            video.srcObject.getTracks().forEach(track => track.stop());
+            video.style.display = 'none';
+            captureBtn.style.display = 'none';
+            cameraOn = false;
+            this.textContent = 'Turn On Camera';
+        } else {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    video.srcObject = stream;
+                    video.style.display = 'block';
+                    captureBtn.style.display = 'block';
+                    cameraOn = true;
+                    this.textContent = 'Turn Off Camera';
+                })
+                .catch(err => console.log("Error: " + err));
+        }
+    };
+
+    // Capture the image from the video feed
+    captureBtn.onclick = function() {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Konversi gambar menjadi URL untuk ditampilkan sebagai pratinjau
+        let dataUrl = canvas.toDataURL('image/jpeg');
+        capturedImage.src = dataUrl;
+        capturedImage.style.display = 'block';
+
+        // Konversi gambar menjadi blob dan masukkan ke input file
+        canvas.toBlob(blob => {
+            let file = new File([blob], 'captured_image.jpg', { type: 'image/jpeg' });
+            let dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            capturedImageInput.files = dataTransfer.files;
+
+            // Tampilkan tombol upload
+            uploadCapturedImage.style.display = 'block';
+        }, 'image/jpeg');
+    };
+</script>
+
+<h2>Upload Image</h2>
+<form method="POST" enctype="multipart/form-data" class="upload-form">
+    <label>Upload Image:</label>
+    <input type="file" name="image" required>
+    <button type="submit" class="create-btn">Upload</button>
+</form>
+
+
+<h2>Detection Results</h2>
+<form method="GET" action="{{ url_for('download_all_detections_zip', workspace_id=workspace_id) }}">
+    <button type="submit" class="create-btn">Download All Images and Detections as ZIP</button>
+</form>
+<form method="POST" action="{{ url_for('clear_all_detections', workspace_id=workspace_id) }}">
+    <button type="submit" class="delete-btn">Clear All Detections</button>
+</form>
+
+<div class="grid">
+    {% for detection in detections %}
+    <div class="grid-item">
+        <img src="{{ url_for('static', filename='uploads/' + detection[0]) }}" alt="Original Image">
+        <img src="{{ url_for('static', filename='annotated/' + detection[1]) }}" alt="Annotated Image">
+        <div class="details">
+            <p><strong>Original:</strong> {{ detection[0] }}</p>
+            <p><strong>Detection Info:</strong></p>
+            <ul>
+                {% for result in detection[2] %}
+                <li>{{ result.class }} (Confidence: {{ result.confidence }})</li>
+                {% endfor %}
+            </ul>
+            <p><em>Uploaded at: {{ detection[3] }}</em></p>
+
+            <!-- Action Buttons -->
+            <form method="POST" action="/workspace/{{ workspace_id }}/download">
+                <input type="hidden" name="filename" value="{{ detection[1] }}">
+                <button class="download-btn" type="submit">Download</button>
+            </form>
+            <form method="POST" action="/workspace/{{ workspace_id }}/delete">
+                <input type="hidden" name="filename" value="{{ detection[1] }}">
+                <button class="delete-btn" type="submit">Delete</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+  <h1>Login</h1>
+  
+  <!-- Menampilkan pesan error jika ada -->
+  {% if error %}
+    <div style="color: red;">{{ error }}</div>
+  {% endif %}
+  
+  <form method="POST">
+    <label>Username:</label>
+    <input type="text" name="username" required>
+    
+    <label>Password:</label>
+    <input type="password" name="password" required>
+    
+    <button type="submit">Login</button>
+  </form>
+  
+  <hr>
+  
+  <a href="{{ url_for('login_google') }}">
+    <button class="google-login-btn">
+      <img src="{{ url_for('static', filename='images/logogoogle.png') }}" alt="Google logo" class="google-logo"> 
+      Login with Google
+    </button>
+  </a>
+</div>
+{% endblock %}

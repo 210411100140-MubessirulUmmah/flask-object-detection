@@ -1,0 +1,8 @@
+Flask==2.3.2
+mysql-connector-python==8.0.33
+authlib==1.2.0
+opencv-python-headless==4.8.0.74
+Pillow==10.0.1
+bcrypt==4.0.1
+ultralytics==8.0.43
+Werkzeug==2.3.2

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Your Workspaces</h1>
+    <form method="POST" class="create-workspace-form">
+        <div class="input-container">
+            <label for="name">Workspace Name:</label>
+            <input type="text" name="name" id="name" placeholder="Enter workspace name" required>
+        </div>
+        <button type="submit" class="create-btn">Create Workspace</button>
+    </form>
+
+    <div class="workspace-list">
+        {% for workspace in workspaces %}
+        <div class="workspace-item">
+            <a href="/workspace/{{ workspace[0] }}" class="workspace-link">{{ workspace[1] }}</a>
+            <form method="POST" action="{{ url_for('delete_workspace', workspace_id=workspace[0]) }}">
+                <button type="submit" class="delete-btn">Delete Workspace</button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock %}
